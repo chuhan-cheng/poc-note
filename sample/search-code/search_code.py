@@ -1,6 +1,5 @@
 import re
 import json
-import argparse
 from collections import deque
 
 # 關鍵字定義
@@ -12,8 +11,28 @@ KEYWORDS = {
 ALL_KEYWORDS = set().union(*KEYWORDS.values())
 keyword_pattern = re.compile(r'\b(' + '|'.join(re.escape(k) for k in ALL_KEYWORDS) + r')\b')
 
-def find_code_segments_streaming(file_path, window_size=5, keyword_threshold=3,
-                                 max_segment_length=20, max_blank_lines=2, min_keyword_lines=2):
+def extract_code_segments(file_path,
+                          window_size=5,
+                          keyword_threshold=3,
+                          max_segment_length=20,
+                          max_blank_lines=2,
+                          min_keyword_lines=2,
+                          top_n=0):
+    """
+    從混合 log 檔中擷取出疑似程式碼區塊，依關鍵字密度排序。
+
+    Args:
+        file_path (str): 檔案路徑
+        window_size (int): 關鍵字視窗大小（行數）
+        keyword_threshold (int): 視窗內最小關鍵字數量
+        max_segment_length (int): 擷取區塊最大長度
+        max_blank_lines (int): 區塊中允許最多空白行（無關鍵字）
+        min_keyword_lines (int): 區塊內需有幾行含關鍵字
+        top_n (int): 回傳前 N 個區段（依關鍵字數排序），0 為全部
+
+    Returns:
+        List[Dict]: 每段區塊資訊，包含 start_line, end_line, lines
+    """
     segments = []
     buffer = deque()
     keyword_buffer = deque()
@@ -47,7 +66,6 @@ def find_code_segments_streaming(file_path, window_size=5, keyword_threshold=3,
 
             window_sum = sum(list(keyword_buffer)[-window_size:])
             if window_sum >= keyword_threshold:
-                # start new segment from current position in buffer
                 segment_lines = list(buffer)
                 segment_keywords = list(keyword_buffer)
                 blank_count = 0
@@ -72,19 +90,29 @@ def find_code_segments_streaming(file_path, window_size=5, keyword_threshold=3,
 
                 flush_segment(segment_start, segment_lines, segment_keywords)
 
-                # 清空 buffer，從下一行重新滑動
                 buffer.clear()
                 keyword_buffer.clear()
             else:
-                # 滑動視窗
                 buffer.popleft()
                 keyword_buffer.popleft()
     finally:
         file.close()
 
+    # 排序與擷取前 N 段
+    segments.sort(key=lambda seg: seg["keyword_hits"], reverse=True)
+    if top_n > 0:
+        segments = segments[:top_n]
+
+    for seg in segments:
+        del seg["keyword_hits"]
+
     return segments
 
+# =============================
+# CLI 模式
+# =============================
 def main():
+    import argparse
     parser = argparse.ArgumentParser(description="Extract code-like segments from a mixed log file (streaming).")
     parser.add_argument("file", help="Path to the input log file.")
     parser.add_argument("--window", type=int, default=5, help="Window size (number of lines).")
@@ -95,25 +123,17 @@ def main():
     parser.add_argument("--top", type=int, default=0, help="Return only top N segments sorted by keyword count.")
     args = parser.parse_args()
 
-    segments = find_code_segments_streaming(
+    result = extract_code_segments(
         file_path=args.file,
         window_size=args.window,
         keyword_threshold=args.threshold,
         max_segment_length=args.maxlen,
         max_blank_lines=args.maxblank,
-        min_keyword_lines=args.minlines
+        min_keyword_lines=args.minlines,
+        top_n=args.top
     )
 
-    # 排序與取前 N 筆
-    segments.sort(key=lambda seg: seg["keyword_hits"], reverse=True)
-    if args.top > 0:
-        segments = segments[:args.top]
-
-    # 移除排序欄位再輸出
-    for seg in segments:
-        del seg["keyword_hits"]
-
-    print(json.dumps(segments, indent=2, ensure_ascii=False))
+    print(json.dumps(result, indent=2, ensure_ascii=False))
 
 if __name__ == '__main__':
     main()
