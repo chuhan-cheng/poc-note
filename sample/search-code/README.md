@@ -1,5 +1,5 @@
 # Introduction
-Search code within the file.       |
+Search code within the file.
 
 ## Usage
 ```bash
