@@ -1,0 +1,35 @@
+2025-07-31 13:02:05 DEBUG Job complete
+2025-07-31 13:02:05 DEBUG Job complete
+2025-07-31 13:02:05 DEBUG Job complete
+2025-07-31 13:02:05 DEBUG Job complete
+2025-07-31 13:02:05 DEBUG Job complete
+2025-07-31 13:02:05 DEBUG Job complete
+2025-07-31 13:02:05 DEBUG Job complete
+2025-07-31 13:02:05 DEBUG Job complete
+2025-07-31 13:02:05 DEBUG Job complete
+2025-07-31 13:02:05 DEBUG Job complete
+2025-07-31 13:02:05 DEBUG Job complete
+2025-07-31 13:02:04 INFO Starting job
+Downloading data...
+int main() {
+    printf("Hello world\n");
+    return 0;
+}
+2025-07-31 13:02:05 DEBUG Job complete
+2025-07-31 13:02:05 DEBUG Job complete
+2025-07-31 13:02:05 DEBUG Job complete
+2025-07-31 13:02:05 DEBUG Job complete
+2025-07-31 13:02:05 DEBUG Job complete
+2025-07-31 13:02:05 DEBUG Job complete
+2025-07-31 13:02:05 DEBUG Job complete
+2025-07-31 13:02:05 DEBUG Job complete
+2025-07-31 13:02:05 DEBUG Job complete
+2025-07-31 13:02:05 DEBUG Job complete
+2025-07-31 13:02:05 DEBUG Job complete
+2025-07-31 13:02:05 DEBUG Job complete
+public class Hello {
+    public static void main(String[] args) {
+        System.out.println("Hello");
+    }
+}
+EOF
