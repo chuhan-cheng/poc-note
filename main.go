@@ -8,7 +8,7 @@ import (
 func busyLoop(wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
-		// 空轉，持續消耗 CPU
+		// 空轉，持續消耗 CPU 
 	}
 }
 
