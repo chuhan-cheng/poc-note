@@ -6,5 +6,5 @@ import (
 
 
 func main() {
-	fmt.Println("GOOD")
+	fmt.Println("It's dev change")
 }
