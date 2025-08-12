@@ -36,9 +36,16 @@ jobs:
       - name: Generate release notes
         id: generate_notes
         run: |
-          PREV_TAG=$(git describe --tags --abbrev=0 ${GITHUB_REF}^)
+          echo "Current tag: $GITHUB_REF_NAME"
+          PREV_TAG=$(git tag --sort=-v:refname | grep -A1 "^${GITHUB_REF_NAME}$" | tail -n1)
           echo "Previous tag: $PREV_TAG"
-          NOTES=$(git log $PREV_TAG..${GITHUB_REF} --pretty=format:'- %s' || echo "- Initial release")
+
+          if [ -z "$PREV_TAG" ]; then
+            NOTES="- Initial release"
+          else
+            NOTES=$(git log ${PREV_TAG}..${GITHUB_REF_NAME} --pretty=format:'- %s')
+          fi
+
           echo "notes<<EOF" >> $GITHUB_OUTPUT
           echo "$NOTES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
