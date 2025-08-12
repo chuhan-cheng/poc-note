@@ -32,15 +32,23 @@ jobs:
           cd dist
           zip server-${GITHUB_REF_NAME}.zip server
 
-      # 5. 建立 GitHub Release（會自動生成 source code 壓縮檔）
+      # 5. 生成 release notes
+      - name: Generate release notes
+        id: generate_notes
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 ${GITHUB_REF}^)
+          echo "Previous tag: $PREV_TAG"
+          NOTES=$(git log $PREV_TAG..${GITHUB_REF} --pretty=format:'- %s' || echo "- Initial release")
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      # 6. 創建 GitHub Release
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           name: Release ${{ github.ref_name }}
-          body: |
-            ## Changes
-            - 自動編譯並打包 Go server
-            - Source code 自動附加
+          body: ${{ steps.generate_notes.outputs.notes }}
           draft: false
           prerelease: false
           files: dist/*.zip
